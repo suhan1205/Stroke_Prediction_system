@@ -181,80 +181,52 @@ elif option == "Stroke Distribution":
 # ----------------------------------------------------
 # Prediction
 # ----------------------------------------------------
+st.subheader("🩺 Prediction Result")
+
+stroke_prob = probability[1] * 100
+no_stroke_prob = probability[0] * 100
+
+# Risk Classification
+if stroke_prob >= 50:
+    st.error("🚨 High Risk of Stroke")
+    st.error(f"Stroke Risk Probability: **{stroke_prob:.2f}%**")
+    st.warning("""
+### Recommendation
+- Consult a healthcare professional as soon as possible.
+- Monitor blood pressure and blood sugar regularly.
+- Follow a healthy diet and exercise routine.
+""")
+
+elif stroke_prob >= 20:
+    st.warning("⚠️ Moderate Risk of Stroke")
+    st.warning(f"Stroke Risk Probability: **{stroke_prob:.2f}%**")
+    st.info("""
+### Recommendation
+- Maintain a healthy lifestyle.
+- Schedule a routine health check-up.
+- Control risk factors such as hypertension and diabetes.
+""")
+
 else:
+    st.success("✅ Low Risk of Stroke")
+    st.success(f"Stroke Risk Probability: **{stroke_prob:.2f}%**")
+    st.info("""
+### Recommendation
+- Continue maintaining a healthy lifestyle.
+- Exercise regularly.
+- Eat a balanced diet and get regular health check-ups.
+""")
 
-    st.header("Prediction")
+st.markdown("---")
 
-    col1, col2 = st.columns(2)
+col1, col2 = st.columns(2)
 
-    with col1:
-        age = st.number_input("Age", 1, 120, 45)
-        hypertension = st.selectbox("Hypertension", [0,1])
-        heart_disease = st.selectbox("Heart Disease", [0,1])
-        avg_glucose_level = st.number_input("Average Glucose Level",50.0,400.0,100.0)
-        bmi = st.number_input("BMI",10.0,60.0,25.0)
+with col1:
+    st.metric("🟢 No Stroke Probability", f"{no_stroke_prob:.2f}%")
 
-    with col2:
-        gender = st.selectbox("Gender",["Male","Female"])
-        ever_married = st.selectbox("Ever Married",["Yes","No"])
-        work_type = st.selectbox(
-            "Work Type",
-            ["Private","Self-employed","Govt_job","children","Never_worked"]
-        )
-        residence_type = st.selectbox(
-            "Residence Type",
-            ["Urban","Rural"]
-        )
-        smoking_status = st.selectbox(
-            "Smoking Status",
-            ["formerly smoked","never smoked","smokes","Unknown"]
-        )
+with col2:
+    st.metric("🔴 Stroke Probability", f"{stroke_prob:.2f}%")
 
-    if st.button("Predict", use_container_width=True):
+st.progress(min(stroke_prob / 100, 1.0))
 
-        input_dict = {
-            "age":age,
-            "hypertension":hypertension,
-            "heart_disease":heart_disease,
-            "avg_glucose_level":avg_glucose_level,
-            "bmi":bmi,
-        }
-
-        for col in model_columns:
-            if col not in input_dict:
-                input_dict[col]=0
-
-        if "gender_Male" in model_columns and gender=="Male":
-            input_dict["gender_Male"]=1
-
-        if "ever_married_Yes" in model_columns and ever_married=="Yes":
-            input_dict["ever_married_Yes"]=1
-
-        if "Residence_type_Urban" in model_columns and residence_type=="Urban":
-            input_dict["Residence_type_Urban"]=1
-
-        wt=f"work_type_{work_type}"
-        if wt in model_columns:
-            input_dict[wt]=1
-
-        sm=f"smoking_status_{smoking_status}"
-        if sm in model_columns:
-            input_dict[sm]=1
-
-        input_df=pd.DataFrame([input_dict])
-        input_df=input_df[model_columns]
-
-        prediction=model.predict(input_df)[0]
-        probability=model.predict_proba(input_df)[0]
-
-        st.subheader("Prediction Result")
-
-        if prediction==1:
-            st.error("⚠️ High Risk of Stroke")
-        else:
-            st.success("✅ Low Risk of Stroke")
-
-        st.write(f"### Probability of No Stroke : {probability[0]*100:.2f}%")
-        st.write(f"### Probability of Stroke : {probability[1]*100:.2f}%")
-
-        st.balloons()
+st.balloons()
