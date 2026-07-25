@@ -5,9 +5,11 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Load model
-model = joblib.load("/Users/sakshamkapoor/Downloads/ML-Summer_training/classification_streamlit/gradient_boosting_model.pkl")
-model_columns = joblib.load("model_columns.pkl")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model = joblib.load(os.path.join(BASE_DIR, "gradient_boosting_model.pkl"))
+model_columns = joblib.load(os.path.join(BASE_DIR, "model_columns.pkl"))
+df = pd.read_csv(os.path.join(BASE_DIR, "healthcare-dataset-stroke-data.csv"))
 
 DATA_PATH = "healthcare-dataset-stroke-data.csv"
 df = pd.read_csv(DATA_PATH)
