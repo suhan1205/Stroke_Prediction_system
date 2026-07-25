@@ -5,6 +5,10 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Load model
+model = joblib.load("gradient_boosting_model.pkl")
+model_columns = joblib.load("model_columns.pkl")
+
 DATA_PATH = "healthcare-dataset-stroke-data.csv"
 df = pd.read_csv(DATA_PATH)
 
