@@ -11,9 +11,6 @@ model = joblib.load(os.path.join(BASE_DIR, "gradient_boosting_model.pkl"))
 model_columns = joblib.load(os.path.join(BASE_DIR, "model_columns.pkl"))
 df = pd.read_csv(os.path.join(BASE_DIR, "healthcare-dataset-stroke-data.csv"))
 
-DATA_PATH = "healthcare-dataset-stroke-data.csv"
-df = pd.read_csv(DATA_PATH)
-
 st.title("❤️ Stroke Prediction System")
 st.markdown("Predict the possibility of stroke using Machine Learning.")
 
