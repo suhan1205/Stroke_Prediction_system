@@ -181,6 +181,72 @@ elif option == "Stroke Distribution":
 # ----------------------------------------------------
 # Prediction
 # ----------------------------------------------------
+else:
+
+    st.header("Prediction")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        age = st.number_input("Age", 1, 120, 45)
+        hypertension = st.selectbox("Hypertension", [0,1])
+        heart_disease = st.selectbox("Heart Disease", [0,1])
+        avg_glucose_level = st.number_input("Average Glucose Level",50.0,400.0,100.0)
+        bmi = st.number_input("BMI",10.0,60.0,25.0)
+
+    with col2:
+        gender = st.selectbox("Gender",["Male","Female"])
+        ever_married = st.selectbox("Ever Married",["Yes","No"])
+        work_type = st.selectbox(
+            "Work Type",
+            ["Private","Self-employed","Govt_job","children","Never_worked"]
+        )
+        residence_type = st.selectbox(
+            "Residence Type",
+            ["Urban","Rural"]
+        )
+        smoking_status = st.selectbox(
+            "Smoking Status",
+            ["formerly smoked","never smoked","smokes","Unknown"]
+        )
+
+    if st.button("Predict", use_container_width=True):
+
+        input_dict = {
+            "age":age,
+            "hypertension":hypertension,
+            "heart_disease":heart_disease,
+            "avg_glucose_level":avg_glucose_level,
+            "bmi":bmi,
+        }
+
+        for col in model_columns:
+            if col not in input_dict:
+                input_dict[col]=0
+
+        if "gender_Male" in model_columns and gender=="Male":
+            input_dict["gender_Male"]=1
+
+        if "ever_married_Yes" in model_columns and ever_married=="Yes":
+            input_dict["ever_married_Yes"]=1
+
+        if "Residence_type_Urban" in model_columns and residence_type=="Urban":
+            input_dict["Residence_type_Urban"]=1
+
+        wt=f"work_type_{work_type}"
+        if wt in model_columns:
+            input_dict[wt]=1
+
+        sm=f"smoking_status_{smoking_status}"
+        if sm in model_columns:
+            input_dict[sm]=1
+
+        input_df=pd.DataFrame([input_dict])
+        input_df=input_df[model_columns]
+
+        prediction=model.predict(input_df)[0]
+        probability=model.predict_proba(input_df)[0]
+        
 st.subheader("🩺 Prediction Result")
 
 stroke_prob = probability[1] * 100
