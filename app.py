@@ -183,116 +183,196 @@ elif option == "Stroke Distribution":
 # ----------------------------------------------------
 else:
 
-    st.header("Prediction")
+    st.header("🩺 Stroke Prediction")
 
     col1, col2 = st.columns(2)
 
     with col1:
         age = st.number_input("Age", 1, 120, 45)
-        hypertension = st.selectbox("Hypertension", [0,1])
-        heart_disease = st.selectbox("Heart Disease", [0,1])
-        avg_glucose_level = st.number_input("Average Glucose Level",50.0,400.0,100.0)
-        bmi = st.number_input("BMI",10.0,60.0,25.0)
+        hypertension = st.selectbox("Hypertension", [0, 1])
+        heart_disease = st.selectbox("Heart Disease", [0, 1])
+        avg_glucose_level = st.number_input(
+            "Average Glucose Level",
+            min_value=50.0,
+            max_value=400.0,
+            value=100.0
+        )
+        bmi = st.number_input(
+            "BMI",
+            min_value=10.0,
+            max_value=60.0,
+            value=25.0
+        )
 
     with col2:
-        gender = st.selectbox("Gender",["Male","Female"])
-        ever_married = st.selectbox("Ever Married",["Yes","No"])
+        gender = st.selectbox(
+            "Gender",
+            ["Male", "Female"]
+        )
+
+        ever_married = st.selectbox(
+            "Ever Married",
+            ["Yes", "No"]
+        )
+
         work_type = st.selectbox(
             "Work Type",
-            ["Private","Self-employed","Govt_job","children","Never_worked"]
+            [
+                "Private",
+                "Self-employed",
+                "Govt_job",
+                "children",
+                "Never_worked"
+            ]
         )
+
         residence_type = st.selectbox(
             "Residence Type",
-            ["Urban","Rural"]
+            ["Urban", "Rural"]
         )
+
         smoking_status = st.selectbox(
             "Smoking Status",
-            ["formerly smoked","never smoked","smokes","Unknown"]
+            [
+                "formerly smoked",
+                "never smoked",
+                "smokes",
+                "Unknown"
+            ]
         )
 
-    if st.button("Predict", use_container_width=True):
+    st.write("")
+
+    if st.button("🔍 Predict Stroke Risk", use_container_width=True):
 
         input_dict = {
-            "age":age,
-            "hypertension":hypertension,
-            "heart_disease":heart_disease,
-            "avg_glucose_level":avg_glucose_level,
-            "bmi":bmi,
+            "age": age,
+            "hypertension": hypertension,
+            "heart_disease": heart_disease,
+            "avg_glucose_level": avg_glucose_level,
+            "bmi": bmi,
         }
 
+        # Initialize all dummy columns
         for col in model_columns:
             if col not in input_dict:
-                input_dict[col]=0
+                input_dict[col] = 0
 
-        if "gender_Male" in model_columns and gender=="Male":
-            input_dict["gender_Male"]=1
+        # Gender
+        if "gender_Male" in model_columns and gender == "Male":
+            input_dict["gender_Male"] = 1
 
-        if "ever_married_Yes" in model_columns and ever_married=="Yes":
-            input_dict["ever_married_Yes"]=1
+        # Ever Married
+        if "ever_married_Yes" in model_columns and ever_married == "Yes":
+            input_dict["ever_married_Yes"] = 1
 
-        if "Residence_type_Urban" in model_columns and residence_type=="Urban":
-            input_dict["Residence_type_Urban"]=1
+        # Residence
+        if "Residence_type_Urban" in model_columns and residence_type == "Urban":
+            input_dict["Residence_type_Urban"] = 1
 
-        wt=f"work_type_{work_type}"
+        # Work Type
+        wt = f"work_type_{work_type}"
         if wt in model_columns:
-            input_dict[wt]=1
+            input_dict[wt] = 1
 
-        sm=f"smoking_status_{smoking_status}"
+        # Smoking Status
+        sm = f"smoking_status_{smoking_status}"
         if sm in model_columns:
-            input_dict[sm]=1
+            input_dict[sm] = 1
 
-        input_df=pd.DataFrame([input_dict])
-        input_df=input_df[model_columns]
+        # Create dataframe
+        input_df = pd.DataFrame([input_dict])
+        input_df = input_df[model_columns]
 
-        prediction=model.predict(input_df)[0]
-        probability=model.predict_proba(input_df)[0]
-        
-st.subheader("🩺 Prediction Result")
+        # Prediction
+        prediction = model.predict(input_df)[0]
+        probability = model.predict_proba(input_df)[0]
 
-stroke_prob = probability[1] * 100
-no_stroke_prob = probability[0] * 100
+        stroke_prob = probability[1] * 100
+        no_stroke_prob = probability[0] * 100
 
-# Risk Classification
-if stroke_prob >= 50:
-    st.error("🚨 High Risk of Stroke")
-    st.error(f"Stroke Risk Probability: **{stroke_prob:.2f}%**")
-    st.warning("""
+        st.markdown("---")
+        st.subheader("🩺 Prediction Result")
+
+        # -----------------------------
+        # Risk Classification
+        # -----------------------------
+        if stroke_prob >= 50:
+
+            st.error("🚨 High Risk of Stroke")
+
+            st.error(
+                f"Estimated Stroke Probability: **{stroke_prob:.2f}%**"
+            )
+
+            st.warning("""
 ### Recommendation
-- Consult a healthcare professional as soon as possible.
-- Monitor blood pressure and blood sugar regularly.
-- Follow a healthy diet and exercise routine.
+
+• Consult a healthcare professional immediately.
+
+• Monitor blood pressure and blood sugar regularly.
+
+• Avoid smoking and excessive alcohol.
+
+• Maintain a healthy diet and exercise routine.
 """)
 
-elif stroke_prob >= 20:
-    st.warning("⚠️ Moderate Risk of Stroke")
-    st.warning(f"Stroke Risk Probability: **{stroke_prob:.2f}%**")
-    st.info("""
+        elif stroke_prob >= 20:
+
+            st.warning("⚠️ Moderate Risk of Stroke")
+
+            st.warning(
+                f"Estimated Stroke Probability: **{stroke_prob:.2f}%**"
+            )
+
+            st.info("""
 ### Recommendation
-- Maintain a healthy lifestyle.
-- Schedule a routine health check-up.
-- Control risk factors such as hypertension and diabetes.
+
+• Schedule a routine medical check-up.
+
+• Exercise regularly.
+
+• Maintain a healthy weight.
+
+• Keep blood pressure and glucose under control.
 """)
 
-else:
-    st.success("✅ Low Risk of Stroke")
-    st.success(f"Stroke Risk Probability: **{stroke_prob:.2f}%**")
-    st.info("""
+        else:
+
+            st.success("✅ Low Risk of Stroke")
+
+            st.success(
+                f"Estimated Stroke Probability: **{stroke_prob:.2f}%**"
+            )
+
+            st.info("""
 ### Recommendation
-- Continue maintaining a healthy lifestyle.
-- Exercise regularly.
-- Eat a balanced diet and get regular health check-ups.
+
+• Continue following a healthy lifestyle.
+
+• Eat a balanced diet.
+
+• Stay physically active.
+
+• Go for regular health check-ups.
 """)
 
-st.markdown("---")
+        st.markdown("---")
 
-col1, col2 = st.columns(2)
+        metric1, metric2 = st.columns(2)
 
-with col1:
-    st.metric("🟢 No Stroke Probability", f"{no_stroke_prob:.2f}%")
+        with metric1:
+            st.metric(
+                "🟢 No Stroke Probability",
+                f"{no_stroke_prob:.2f}%"
+            )
 
-with col2:
-    st.metric("🔴 Stroke Probability", f"{stroke_prob:.2f}%")
+        with metric2:
+            st.metric(
+                "🔴 Stroke Probability",
+                f"{stroke_prob:.2f}%"
+            )
 
-st.progress(min(stroke_prob / 100, 1.0))
+        st.progress(stroke_prob / 100)
 
-st.balloons()
+        st.balloons()
